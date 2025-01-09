@@ -1,0 +1,28 @@
+services:
+  database:
+    container_name: afasttoywebapi-database
+    image: postgres:17.2
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=databasename
+
+  backend:
+    container_name: afasttoywebapi
+    image: afasttoywebapi:edge
+    build:
+      context: .
+    ports:
+      - '8080:8080'
+    expose:
+      - 8080
+    environment:
+      - DATABASE_URL=postgresql://username:password@database:5432/databasename
+      - HOST=0.0.0.0
+      - PORT=8080
+    restart: on-failure
+    depends_on:
+      - database
