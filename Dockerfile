@@ -1,4 +1,4 @@
-FROM rust:1.83 AS build
+FROM rust:1.84 AS build
 ENV PKG_CONFIG="ALLOW_CROSS=1"
 
 WORKDIR /opt/app

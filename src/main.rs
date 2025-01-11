@@ -38,9 +38,9 @@ async fn main() {
 
     let app = Router::new()
         .route("/facilities", post(post_facility))
-        .route("/facilities/:uid", get(get_facility))
+        .route("/facilities/{uid}", get(get_facility))
         .route("/facilities/", get(get_facilities))
-        .route("/facilities/:uid", delete(delete_facility))
+        .route("/facilities/{uid}", delete(delete_facility))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(server_url).await.unwrap();
