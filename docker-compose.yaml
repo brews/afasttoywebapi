@@ -23,6 +23,7 @@ services:
       - DATABASE_URL=postgresql://username:password@database:5432/databasename
       - HOST=0.0.0.0
       - PORT=8080
+      - RUST_LOG=TRACE
     restart: on-failure
     depends_on:
       - database
