@@ -57,7 +57,13 @@ pub fn read_facility(
 
     // TODO: Fix leaking the abstraction by returning Err like this.
     match db_output_results {
-        Ok(r) => Ok(core::Facility::from(r.clone())),
+        Ok(r) => {
+            let f: core::Facility = r
+                .try_into()
+                .expect("Got incompatible Facility from storage");
+            // TODO: Actually pass and handle this error ^ properly
+            Ok(f)
+        }
         Err(e) => Err(e),
     }
 }
@@ -93,7 +99,13 @@ pub fn list_facilities(
 
     match db_output_results {
         // Convert databases response into core::Facilities.
-        Ok(r) => Ok(r.into_iter().map(|x| core::Facility::from(x)).collect()),
+        Ok(r) => Ok(r
+            .into_iter()
+            .map(|x| {
+                core::Facility::try_from(x).expect("Got incompatible Facility from storage")
+                // TODO: Actually pass and handle this error ^ properly
+            })
+            .collect()),
         Err(e) => Err(e),
     }
 }
