@@ -11,6 +11,7 @@ use axum::{
 use deadpool_diesel::postgres::Pool;
 use dotenvy::dotenv;
 use std::env;
+use tokio::signal;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error, info};
 
@@ -51,7 +52,34 @@ async fn main() {
 
     info!("listening on {server_url:?}");
     let listener = tokio::net::TcpListener::bind(server_url).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
 }
 
 /// Handle request to create a new facility.
